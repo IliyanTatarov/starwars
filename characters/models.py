@@ -9,7 +9,7 @@ class Collection(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        ordering = ['-id']
+        ordering = ['-id',]
 
     @property
     def filename(self):

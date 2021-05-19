@@ -1,10 +1,11 @@
 from typing import Collection
 from django.urls import path
 
-from .views import CollectionListView, NewCollectionView
+from .views import CollectionListView, CollectionDetailView, CollectionNewView
 
 app_name = 'characters'
 urlpatterns = [
     path('', CollectionListView.as_view(), name='homepage'),
-    path('retrieve/', NewCollectionView.as_view(), name='retrieve'),
+    path('retrieve/', CollectionNewView.as_view(), name='retrieve'),
+    path('<int:pk>/', CollectionDetailView.as_view(), name='collection'),
 ]

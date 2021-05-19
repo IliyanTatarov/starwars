@@ -6,7 +6,7 @@ from django.core.files.base import ContentFile
 from django.http.response import HttpResponseRedirect
 from django.http import HttpResponseRedirect
 from django.urls import reverse
-from django.views.generic import ListView, View
+from django.views.generic import DetailView, ListView, View
 
 import petl as etl
 
@@ -14,12 +14,27 @@ from apiclient.clients import PeopleAPIClient, PlanetsAPIClient
 from .models import Collection
 
 
+# TODO: petl.rowslice (pagination)
+# TODO: petl.cut (column select)
+# TODO: petl.selectcontains | petl.aggregate (filter)
 class CollectionListView(ListView):
     model = Collection
     context_object_name = 'collections'
 
 
-class NewCollectionView(View):
+class CollectionDetailView(DetailView):
+    model = Collection
+    context_object_name = 'collection'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        character_table = etl.fromcsv(self.get_object().csv_file.path)
+        context['headers'] = etl.header(character_table)
+        context['content'] = list(etl.data(character_table))
+        return context
+
+
+class CollectionNewView(View):
     def get(self, request):
         characters_header = [
             'name', 'height', 'mass', 'hair_color', 'skin_color', 'eye_color', 'birth_year', 'gender', 'homeworld', 'date',
@@ -28,10 +43,8 @@ class NewCollectionView(View):
             characters_header,
         ]
 
-        planets_cache = {
+        planets_cache = {}
 
-        }
-        
         people_client = PeopleAPIClient()
         planets_client = PlanetsAPIClient()
 
@@ -82,3 +95,4 @@ class NewCollectionView(View):
         Collection().csv_file.save(collection_name, ContentFile(csv_output.getvalue()))
 
         return HttpResponseRedirect(reverse('characters:homepage'))
+

@@ -1,0 +1,31 @@
+body{
+    height: 100%;
+    background: #fff;
+    background: linear-gradient(#f1f7ff,rgba(248,250,253,0)) no-repeat;
+}
+
+header {
+  > nav {
+    padding: 0.5rem 1rem;
+    margin-bottom: 60px;
+    border-bottom: 1px solid #eff2f5;
+  }
+}
+#fetch_btn{
+    margin-left: 40px;
+}
+table.table{
+    margin-top: 50px;
+    background-color: white;
+    
+    th, td{
+        padding: 10px ;
+        &:first-child {
+            padding-left: 20px;
+        }
+        &:last-child {
+            padding-left: 20px;
+        }
+    }
+}
+/*# sourceMappingURL=base.css.map */

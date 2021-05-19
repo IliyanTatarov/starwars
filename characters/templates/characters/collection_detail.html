@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <div class="row">
+    <div class="col">
+      <h2>{{ collection.filename }}</h2>
+
+      <br>
+      <div class="btn-group" role="group" aria-label="Basic checkbox toggle button group">
+        {% for header in headers %}
+          <input type="checkbox" class="btn-check btn-check-header" id="chk_{{ header }}" autocomplete="off">
+          <label class="btn btn-info" for="chk_{{ header }}">{{ header }}</label>
+        {% endfor %}
+      </div>
+
+      <table class="table table-hover">
+        <thead>
+          <tr>
+            {% for header in headers %}
+              <th scope="col">{{ header }}</th>
+            {% endfor %}
+          </tr>
+        </thead>
+        <tbody>
+          {% for character in content %}
+            <tr class="{% cycle '' 'table-light' %}">
+              {% for field in character %}
+                <td>
+                  {{ field }}
+                </td>
+              {% endfor %}
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+{% endblock %}
