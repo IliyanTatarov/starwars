@@ -1,1 +1,34 @@
 {% extends 'base.html' %}
+
+{% block content %}
+  <div class="row">
+    <div class="col">
+      <h1>Star Wars Explorer</h1>
+      <h2>
+        Collections
+        <a id="fetch_btn" class="btn btn-success" href="{% url 'characters:retrieve' %}" role="button">Fetch</a>
+        <div id="fetch_spinner" class="spinner-border text-secondary" role="status" style="display: none">
+          <span class="sr-only"></span>
+        </div>
+      </h2>
+      {% if collections.count > 0 %}
+        <table class="table table-hover">
+          <thead>
+            <tr>
+              <th scope="col">Collection</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for collection in collections %}
+              <tr class="{% cycle '' 'table-light' %}">
+                <td>
+                  <a href="">{{ collection.filename }}</a>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      {% endif %}
+    </div>
+  </div>
+{% endblock %}
