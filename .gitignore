@@ -1,0 +1,17 @@
+## generic files to ignore
+*.lock
+*.DS_Store
+*.swp
+*.tmp
+*.out
+._*
+*.*~
+*.pyc
+__pycache__/
+.sass-cache
+*.map
+
+env/
+.vscode/
+settings_local.py
+db.sqlite3
