@@ -1,0 +1,9 @@
+{% for character in content %}
+  <tr class="{% cycle '' 'table-light' %}">
+    {% for field in character %}
+      <td>
+        {{ field }}
+      </td>
+    {% endfor %}
+  </tr>
+{% endfor %}

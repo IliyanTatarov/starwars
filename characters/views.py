@@ -3,8 +3,9 @@ import io
 import csv
 
 from django.core.files.base import ContentFile
-from django.http.response import HttpResponseRedirect
-from django.http import HttpResponseRedirect
+from django.http.response import HttpResponseRedirect, JsonResponse
+from django.shortcuts import render
+from django.template import loader
 from django.urls import reverse
 from django.views.generic import DetailView, ListView, View
 
@@ -14,7 +15,6 @@ from apiclient.clients import PeopleAPIClient, PlanetsAPIClient
 from .models import Collection
 
 
-# TODO: petl.rowslice (pagination)
 class CollectionListView(ListView):
     model = Collection
     context_object_name = 'collections'
@@ -24,6 +24,19 @@ class CollectionDetailView(DetailView):
     model = Collection
     context_object_name = 'collection'
 
+    def get(self, request, pk):
+        response = super().get(request, pk)
+        if 'HTTP_X_REQUESTED_WITH' in request.META and request.META.get('HTTP_X_REQUESTED_WITH') == 'XMLHttpRequest':
+            template = loader.get_template('characters/collection_detail_table.html')
+            template_render = template.render(response.context_data)
+            data = {
+                'html': template_render,
+                'more': response.context_data['more'],
+            }
+            return JsonResponse(data)
+        else:
+            return response
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         character_table = etl.fromcsv(self.get_object().csv_file.path)
@@ -31,7 +44,15 @@ class CollectionDetailView(DetailView):
         context['headers'] = etl.header(character_table)
         context['headers_all'] = context['headers']
 
-        context['content'] = list(etl.data(character_table))
+        page = int(self.request.GET.get('page', '1'))
+        data = etl.rowslice(character_table, 10 * (page - 1), 9 + 10 * (page - 1))
+        data = etl.data(data)
+
+        context['more'] = True
+        if len(character_table) < page * 10:
+            context['more'] = False
+
+        context['content'] = list(data)
 
         return context
 
@@ -125,4 +146,3 @@ class CollectionNewView(View):
         Collection().csv_file.save(collection_name, ContentFile(csv_output.getvalue()))
 
         return HttpResponseRedirect(reverse('characters:homepage'))
-
