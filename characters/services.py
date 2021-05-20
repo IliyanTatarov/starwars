@@ -45,43 +45,44 @@ def fetch_character_data():
     people_client = PeopleAPIClient()
     planets_client = PlanetsAPIClient()
 
+    characters_data = list()
     page = 1
     while True:
         response = people_client.get_people({'page': page})
-
         if 'results' in response and len(response['results']) > 0:
-            for result in response['results']:
-                character = list()
-
-                for header in characters_header:
-                    if header in ['height', 'mass']:
-                        try:
-                            character.append(int(result[header].replace(',', '')))
-                        except:
-                            character.append(result[header])
-                    elif header == 'homeworld':
-                        planet_id = result['homeworld'].split('/')[-2]
-                        if planet_id in planets_cache:
-                            planet_name = planets_cache[planet_id]
-                        else:
-                            planet_name = planets_client.get_item(int(planet_id))['name']
-                            planets_cache[planet_id] = planet_name
-                        character.append(planet_name)
-
-                    elif header == 'date':
-                        character.append(result['edited'])
-
-                    else:
-                        character.append(result[header])
-
-                characters.append(character)
-
+            characters_data += response['results']
         else:
             break
 
         page += 1
         if not response['next']:
             break
+    
+    for character_data in characters_data:
+        character = list()
+
+        for header in characters_header:
+            if header in ['height', 'mass']:
+                try:
+                    character.append(int(character_data[header].replace(',', '')))
+                except:
+                    character.append(character_data[header])
+            elif header == 'homeworld':
+                planet_id = character_data['homeworld'].split('/')[-2]
+                if planet_id in planets_cache:
+                    planet_name = planets_cache[planet_id]
+                else:
+                    planet_name = planets_client.get_item(int(planet_id))['name']
+                    planets_cache[planet_id] = planet_name
+                character.append(planet_name)
+
+            elif header == 'date':
+                character.append(character_data['edited'])
+
+            else:
+                character.append(character_data[header])
+
+        characters.append(character)
 
     character_table = etl.wrap(characters)
     csv_output = io.StringIO()
