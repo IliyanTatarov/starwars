@@ -15,8 +15,6 @@ from .models import Collection
 
 
 # TODO: petl.rowslice (pagination)
-# TODO: petl.cut (column select)
-# TODO: petl.selectcontains | petl.aggregate (filter)
 class CollectionListView(ListView):
     model = Collection
     context_object_name = 'collections'
@@ -29,8 +27,40 @@ class CollectionDetailView(DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         character_table = etl.fromcsv(self.get_object().csv_file.path)
+
         context['headers'] = etl.header(character_table)
+        context['headers_all'] = context['headers']
+
         context['content'] = list(etl.data(character_table))
+
+        return context
+
+
+class CollectionAggregateView(DetailView):
+    model = Collection
+    context_object_name = 'collection'
+
+    def get(self, request, pk):
+        filters = self.request.GET.getlist('filters[]')
+        if len(filters) < 1:
+            return HttpResponseRedirect(reverse('characters:collection', kwargs={'pk': pk}))
+        else:
+            return super().get(request, pk)
+
+    def get_context_data(self, **kwargs):
+        filters = self.request.GET.getlist('filters[]')
+
+        context = super().get_context_data(**kwargs)
+        character_table = etl.fromcsv(self.get_object().csv_file.path)
+
+        context['headers'] = filters
+        context['headers_all'] = etl.header(character_table)
+
+        if len(filters) == 1:
+            filters = filters[0]
+        context['content'] = list(etl.data(etl.aggregate(character_table, key=filters, aggregation=len)))
+        context['count'] = True
+
         return context
 
 

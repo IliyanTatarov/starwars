@@ -20,5 +20,5 @@ class Collection(models.Model):
 
     def get_absolute_url(self):
         return reverse('characters:collection', kwargs={
-            'id': self.pk,
+            'pk': self.pk,
         })

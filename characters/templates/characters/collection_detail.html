@@ -7,10 +7,12 @@
 
       <br>
       <div class="btn-group" role="group" aria-label="Basic checkbox toggle button group">
-        {% for header in headers %}
-          <input type="checkbox" class="btn-check btn-check-header" id="chk_{{ header }}" autocomplete="off">
-          <label class="btn btn-info" for="chk_{{ header }}">{{ header }}</label>
-        {% endfor %}
+        <form id="filters_form" action="{% url 'characters:aggregate' collection.pk %}">
+          {% for header in headers_all %}
+            <input name="filters[]" value="{{ header }}" type="checkbox" class="btn-check btn-check-header" id="chk_{{ header }}" {% if header in headers and count %}checked=""{% endif %} autocomplete="off">
+            <label class="btn btn-info" for="chk_{{ header }}">{{ header }}</label>
+          {% endfor %}
+        </form>
       </div>
 
       <table class="table table-hover">
@@ -19,6 +21,9 @@
             {% for header in headers %}
               <th scope="col">{{ header }}</th>
             {% endfor %}
+            {% if count %}
+              <th scope="col">Count</th>
+            {% endif %}
           </tr>
         </thead>
         <tbody>
