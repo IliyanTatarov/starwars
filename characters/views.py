@@ -19,7 +19,7 @@ class CollectionDetailView(DetailView):
 
     def get(self, request, pk):
         response = super().get(request, pk)
-        if 'HTTP_X_REQUESTED_WITH' in request.META and request.META.get('HTTP_X_REQUESTED_WITH') == 'XMLHttpRequest':
+        if request.headers.get('x-requested-with') == 'XMLHttpRequest':
             template = loader.get_template('characters/collection_detail_table.html')
             template_render = template.render(response.context_data)
             data = {

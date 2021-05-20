@@ -31,6 +31,7 @@ def paginate_characters_table(csv_path, page):
 
     return headers, data, total_characters
 
+
 def fetch_characters_data():
     people_client = PeopleAPIClient()
 
@@ -46,13 +47,14 @@ def fetch_characters_data():
         page += 1
         if not response['next']:
             break
-    
+
     return characters_data
+
 
 def replace_homeworld_planet_name(characters_table):
     planets_client = PlanetsAPIClient()
     planets = {}
-    
+
     homeworld_urls = set(characters_table['homeworld'])
 
     for homeworld_url in homeworld_urls:
@@ -75,10 +77,11 @@ def get_table(characters_data):
         'date',
         lambda date_field: datetime.strptime(date_field, '%Y-%m-%dT%H:%M:%S.%fZ').strftime('%Y-%m-%d')
     )
-    
+
     characters_table = replace_homeworld_planet_name(characters_table)
 
     return characters_table
+
 
 def fetch_characters_csv():
     characters_data = fetch_characters_data()       
