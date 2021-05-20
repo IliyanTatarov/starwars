@@ -5,7 +5,7 @@ from django.urls import reverse
 from django.views.generic import DetailView, ListView, View
 
 from .models import Collection
-from .services import aggregate_character_table, paginate_character_table, fetch_character_data
+from .services import aggregate_character_table, paginate_character_table, fetch_character_csv
 
 
 class CollectionListView(ListView):
@@ -77,7 +77,7 @@ class CollectionAggregateView(DetailView):
 
 class CollectionNewView(View):
     def get(self, request):
-        collection_name, csv_output = fetch_character_data()
+        collection_name, csv_output = fetch_character_csv()
         Collection().csv_file.save(collection_name, ContentFile(csv_output.getvalue()))
 
         return HttpResponseRedirect(reverse('characters:homepage'))

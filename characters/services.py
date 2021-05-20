@@ -31,19 +31,8 @@ def paginate_character_table(csv_path, page):
 
     return headers, data, total_characters
 
-
-def fetch_character_data():
-    characters_header = [
-        'name', 'height', 'mass', 'hair_color', 'skin_color', 'eye_color', 'birth_year', 'gender', 'homeworld', 'date',
-    ]
-    characters = [
-        characters_header,
-    ]
-
-    planets_cache = {}
-
+def fetch_characters_data():
     people_client = PeopleAPIClient()
-    planets_client = PlanetsAPIClient()
 
     characters_data = list()
     page = 1
@@ -53,41 +42,51 @@ def fetch_character_data():
             characters_data += response['results']
         else:
             break
-
+        
         page += 1
         if not response['next']:
             break
     
-    for character_data in characters_data:
-        character = list()
+    return characters_data
 
-        for header in characters_header:
-            if header in ['height', 'mass']:
-                try:
-                    character.append(int(character_data[header].replace(',', '')))
-                except:
-                    character.append(character_data[header])
-            elif header == 'homeworld':
-                planet_id = character_data['homeworld'].split('/')[-2]
-                if planet_id in planets_cache:
-                    planet_name = planets_cache[planet_id]
-                else:
-                    planet_name = planets_client.get_item(int(planet_id))['name']
-                    planets_cache[planet_id] = planet_name
-                character.append(planet_name)
+def replace_homeworld_planet_name(characters_table):
+    planets_client = PlanetsAPIClient()
+    planets = {}
+    
+    homeworld_urls = set(characters_table['homeworld'])
 
-            elif header == 'date':
-                character.append(character_data['edited'])
+    for homeworld_url in homeworld_urls:
+        homeworld_id = homeworld_url.split('/')[-2]
+        planets[homeworld_url] = planets_client.get_item(int(homeworld_id))['name']
 
-            else:
-                character.append(character_data[header])
+    characters_table = etl.convert(characters_table, 'homeworld', lambda homeworld_url: planets[homeworld_url])    
 
-        characters.append(character)
+    return characters_table
 
-    character_table = etl.wrap(characters)
+
+def get_table(characters_data):
+    characters_headers = [
+        'name', 'height', 'mass', 'hair_color', 'skin_color', 'eye_color', 'birth_year', 'gender', 'homeworld', 'edited',
+    ]
+    characters_table = etl.fromdicts(characters_data, characters_headers)
+    characters_table = etl.rename(characters_table, 'edited', 'date')
+    characters_table = etl.convert(
+        characters_table,
+        'date',
+        lambda date_field: datetime.strptime(date_field, '%Y-%m-%dT%H:%M:%S.%fZ').strftime('%Y-%m-%d')
+    )
+    
+    characters_table = replace_homeworld_planet_name(characters_table)
+
+    return characters_table
+
+def fetch_character_csv():
+    characters_data = fetch_characters_data()       
+
+    characters_table = get_table(characters_data)
     csv_output = io.StringIO()
     csv_writer = csv.writer(csv_output)
-    csv_writer.writerows(character_table)
+    csv_writer.writerows(characters_table)
 
     collection_name = f'{datetime.now().strftime("%Y-%m-%d-%H-%M-%S-%f")}.csv'
 
