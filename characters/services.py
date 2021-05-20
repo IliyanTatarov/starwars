@@ -7,27 +7,27 @@ import petl as etl
 from apiclient.clients import PeopleAPIClient, PlanetsAPIClient
 
 
-def get_character_table(csv_path):
-    character_table = etl.fromcsv(csv_path)
-    headers = etl.header(character_table)
-    total_characters = len(character_table)
+def get_characters_table(csv_path):
+    characters_table = etl.fromcsv(csv_path)
+    headers = etl.header(characters_table)
+    total_characters = len(characters_table)
 
-    return character_table, headers, total_characters
+    return characters_table, headers, total_characters
 
 
-def aggregate_character_table(csv_path, filters):
+def aggregate_characters_table(csv_path, filters):
     if len(filters) == 1:
         filters = filters[0]
 
-    character_table, headers, total_characters = get_character_table(csv_path)
-    data = etl.data(etl.aggregate(character_table, key=filters, aggregation=len))
+    characters_table, headers, total_characters = get_characters_table(csv_path)
+    data = etl.data(etl.aggregate(characters_table, key=filters, aggregation=len))
 
     return headers, data, total_characters
 
 
-def paginate_character_table(csv_path, page):
-    character_table, headers, total_characters = get_character_table(csv_path)
-    data = etl.data(etl.rowslice(character_table, 10 * (page - 1), 9 + 10 * (page - 1)))
+def paginate_characters_table(csv_path, page):
+    characters_table, headers, total_characters = get_characters_table(csv_path)
+    data = etl.data(etl.rowslice(characters_table, 10 * (page - 1), 10 + 10 * (page - 1)))
 
     return headers, data, total_characters
 
@@ -80,12 +80,12 @@ def get_table(characters_data):
 
     return characters_table
 
-def fetch_character_csv():
+def fetch_characters_csv():
     characters_data = fetch_characters_data()       
 
     characters_table = get_table(characters_data)
-    csv_output = io.StringIO()
-    csv_writer = csv.writer(csv_output)
+    csv_output = io.StringIO(newline='')
+    csv_writer = csv.writer(csv_output, lineterminator='\n')
     csv_writer.writerows(characters_table)
 
     collection_name = f'{datetime.now().strftime("%Y-%m-%d-%H-%M-%S-%f")}.csv'

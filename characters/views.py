@@ -5,7 +5,7 @@ from django.urls import reverse
 from django.views.generic import DetailView, ListView, View
 
 from .models import Collection
-from .services import aggregate_character_table, paginate_character_table, fetch_character_csv
+from .services import aggregate_characters_table, paginate_characters_table, fetch_characters_csv
 
 
 class CollectionListView(ListView):
@@ -35,7 +35,7 @@ class CollectionDetailView(DetailView):
         csv_path = self.get_object().csv_file.path
         page = int(self.request.GET.get('page', '1'))
         
-        headers, characters_data, total_characters = paginate_character_table(csv_path, page)
+        headers, characters_data, total_characters = paginate_characters_table(csv_path, page)
 
         context['headers'] = headers
         context['headers_all'] = headers
@@ -65,7 +65,7 @@ class CollectionAggregateView(DetailView):
         csv_path = self.get_object().csv_file.path
         filters = self.request.GET.getlist('filters[]')
 
-        headers, characters_data, _ = aggregate_character_table(csv_path, filters)
+        headers, characters_data, _ = aggregate_characters_table(csv_path, filters)
 
         context['headers'] = filters
         context['headers_all'] = headers
@@ -77,7 +77,7 @@ class CollectionAggregateView(DetailView):
 
 class CollectionNewView(View):
     def get(self, request):
-        collection_name, csv_output = fetch_character_csv()
+        collection_name, csv_output = fetch_characters_csv()
         Collection().csv_file.save(collection_name, ContentFile(csv_output.getvalue()))
 
         return HttpResponseRedirect(reverse('characters:homepage'))

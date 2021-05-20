@@ -15,7 +15,7 @@ jQuery( document ).ready(function($) {
             'page' : $(this).data('page')
         }
         $.get('', params, function(data) {
-            $('#character_table tbody').append(data['html']);
+            $('#characters_table tbody').append(data['html']);
             $('#load_more_btn').data('page', Number($('#load_more_btn').data('page')) + 1);
             if(!data['more']) $('#load_more_btn').hide();
         });
